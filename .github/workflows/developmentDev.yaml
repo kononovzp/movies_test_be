@@ -88,11 +88,11 @@ jobs:
           port: ${{ secrets.AWS_EC2_SSH_PORT }}
           username: ${{ secrets.AWS_EC2_USERNAME }}
           key: ${{ secrets.AWS_EC2_KEY }}
-          envs: AWS_ECR_REGISTRY,AWS_ECR_REPOSITORY,AWS_ECR_REGION,IMAGE_TAG,API_PORT,DB_HOST,DB_PORT,DB_USERNAME,DB_PASSWORD,DB_DATABASE,REDIS_PORT,REDIS_PASSWORD,PASSWORD_SALT_ROUNDS,OTP_EXPIRES_IN,JWT_SECRET,JWT_ACCESS_TOKEN_EXPIRES_IN,JWT_REFRESH_TOKEN_EXPIRES_IN,SMTP_HOST,SMTP_USER,SMTP_PASSWORD,SMTP_FROM,AWS_DEFAULT_REGION,AWS_S3_BUCKET,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,NODE_ENV
+          envs: AWS_ECR_REGISTRY,AWS_ECR_REPOSITORY,AWS_ECR_REGION,IMAGE_TAG,PORT,DB_HOST,DB_PORT,DB_USERNAME,DB_PASSWORD,DB_DATABASE,REDIS_PORT,REDIS_PASSWORD,PASSWORD_SALT_ROUNDS,OTP_EXPIRES_IN,JWT_SECRET,JWT_ACCESS_TOKEN_EXPIRES_IN,JWT_REFRESH_TOKEN_EXPIRES_IN,SMTP_HOST,SMTP_USER,SMTP_PASSWORD,SMTP_FROM,AWS_DEFAULT_REGION,AWS_S3_BUCKET,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,NODE_ENV
           script: |
             aws ecr get-login-password --region $AWS_ECR_REGION | docker login --username AWS --password-stdin $AWS_ECR_REGISTRY
-            docker stop backend redis pgadmin4
-            docker rm backend redis pgadmin4
+            docker stop backend
+            docker rm backend
             docker rmi $(docker images $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:* -q)
             docker pull $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG
             docker run -d \
@@ -101,7 +101,7 @@ jobs:
                 --restart unless-stopped \
                 --label=traefik.enable=true \
                 --label='traefik.http.routers.backend.rule=PathPrefix(`/api`)' \
-                --label=traefik.http.services.backend.loadbalancer.server.port=$API_PORT \
+                --label=traefik.http.services.backend.loadbalancer.server.port=$PORT \
                 -e NODE_ENV \
                 -e PORT \
                 -e DB_HOST \
