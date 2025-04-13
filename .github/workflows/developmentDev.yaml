@@ -99,9 +99,6 @@ jobs:
                 --name backend \
                 --network host \
                 --restart unless-stopped \
-                --label=traefik.enable=true \
-                --label='traefik.http.routers.backend.rule=PathPrefix(`/api`)' \
-                --label=traefik.http.services.backend.loadbalancer.server.port=$PORT \
                 -e NODE_ENV \
                 -e PORT \
                 -e DB_HOST \
@@ -120,5 +117,6 @@ jobs:
                 -e AWS_S3_BUCKET \
                 -e AWS_ACCESS_KEY_ID \
                 -e AWS_SECRET_ACCESS_KEY \
+                -p $PORT:$PORT \
                 $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG
      
