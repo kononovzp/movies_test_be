@@ -117,6 +117,6 @@ jobs:
                 -e AWS_S3_BUCKET \
                 -e AWS_ACCESS_KEY_ID \
                 -e AWS_SECRET_ACCESS_KEY \
-                -p $PORT:$PORT \
+                -p 3232:3232 \
                 $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG
      
