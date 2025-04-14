@@ -4,8 +4,11 @@ import {
   FileTypeValidator,
   Get,
   MaxFileSizeValidator,
+  Param,
   ParseFilePipe,
+  Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -16,9 +19,10 @@ import { ApiConsumes, ApiOperation } from '@nestjs/swagger';
 import { UserJwtPayload } from 'auth/decorators/user-jwt-payload.decorator';
 import { UserJwtPayloadDto } from 'auth/dto/user-jwt-payload.dto';
 import { AccessTokenGuard } from 'auth/guards/access-token.guard';
+import { PageOptionsRequestQueryDto } from 'common/dtos/page-options-request-query.dto';
 import { CreateMovieDto } from 'movies/dto/create-movie.dto';
-import { MovieResponseDto } from 'movies/dto/get-movie-res.dto';
-import { MoviesResponseDto } from 'movies/dto/get-movies-res.dto';
+import { GetAllMoviesResponseBody } from 'movies/dto/get-all-movies-response-body.dto';
+import { GetMovieResponseBodyDto } from 'movies/dto/get-movie-response-body.dto';
 import { MoviesService } from 'movies/movies.service';
 
 @UseGuards(AccessTokenGuard)
@@ -43,7 +47,7 @@ export class MoviesController {
       }),
     )
     poster: Express.Multer.File,
-  ): Promise<MovieResponseDto> {
+  ): Promise<GetMovieResponseBodyDto> {
     const { userId } = userJwtPayload;
 
     return this.moviesService.createMovie(createMovieDto, poster, userId);
@@ -52,10 +56,45 @@ export class MoviesController {
   @Get()
   async getMovies(
     @UserJwtPayload() userJwtPayload: UserJwtPayloadDto,
-  ): Promise<MoviesResponseDto> {
+    @Query() query: PageOptionsRequestQueryDto,
+  ): Promise<GetAllMoviesResponseBody> {
     const { userId } = userJwtPayload;
-    console.log('userId: ', userId);
+    const { page, take } = query;
 
-    return this.moviesService.getAllMovies(userId);
+    const { movies, count } = await this.moviesService.getAllMovies({
+      ...query,
+      userId,
+    });
+    return new GetAllMoviesResponseBody({
+      metadata: { itemsAmount: count, page, take },
+      movies,
+    });
+  }
+
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('poster'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Update a movie by ID' })
+  async updateMovie(
+    @Param('id') movieId: string,
+    @Body() updateMovieDto: CreateMovieDto,
+    @UserJwtPayload() userJwtPayload: UserJwtPayloadDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: false,
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5000000 }),
+          new FileTypeValidator({ fileType: '(image/png|image/jpeg)' }),
+        ],
+      }),
+    )
+    poster?: Express.Multer.File,
+  ): Promise<GetMovieResponseBodyDto> {
+    return this.moviesService.updateMovie(
+      movieId,
+      updateMovieDto,
+      poster,
+      userJwtPayload.userId,
+    );
   }
 }

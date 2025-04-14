@@ -1,7 +1,10 @@
-import { IsString } from 'class-validator';
-import { MovieResponseDto } from 'movies/dto/get-movie-res.dto';
+import { IsNumber, IsString } from 'class-validator';
+import { GetMovieResponseBodyDto } from 'movies/dto/get-movie-response-body.dto';
 
 export class MoviesResponseDto {
   @IsString()
-  movies: MovieResponseDto[];
+  movies: GetMovieResponseBodyDto[];
+
+  @IsNumber()
+  count: number;
 }

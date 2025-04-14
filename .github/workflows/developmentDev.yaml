@@ -101,6 +101,7 @@ jobs:
                 --restart unless-stopped \
                 -e NODE_ENV \
                 -e PORT \
+                -p 3232:3232 \
                 -e DB_HOST \
                 -e DB_PORT \
                 -e DB_USERNAME \
@@ -117,6 +118,5 @@ jobs:
                 -e AWS_S3_BUCKET \
                 -e AWS_ACCESS_KEY_ID \
                 -e AWS_SECRET_ACCESS_KEY \
-                -p 3232:3232 \
                 $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG
      
