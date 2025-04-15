@@ -24,7 +24,6 @@ export class AuthController {
   })
   async signUp(@Body() body: CreateUserDto): Promise<SuccessAuthResponseDto> {
     const { remember } = body;
-    console.log('body: ', body);
 
     const response = await this.authService.signUp(body, remember);
 

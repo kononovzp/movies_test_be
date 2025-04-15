@@ -31,9 +31,7 @@ async function bootstrap(): Promise<void> {
 
   if (isProduction) app.useLogger(['fatal', 'error']);
 
-  const corsSettings: CorsOptions = isProduction
-    ? { origin: 'https://app.vroombrick.com', credentials: true }
-    : { origin: /^.*$/, credentials: true };
+  const corsSettings: CorsOptions = { origin: /^.*$/, credentials: true };
 
   app.enableCors(corsSettings);
   app.setGlobalPrefix(apiGlobalPrefix);

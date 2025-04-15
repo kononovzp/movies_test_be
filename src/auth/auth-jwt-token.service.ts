@@ -22,7 +22,6 @@ export class AuthJwtTokenService {
     payload: ConstructorParameters<typeof UserJwtPayloadDto>[0],
   ): Promise<string> {
     const payloadInstance = new UserJwtPayloadDto(payload);
-    console.log('payloadInstance: ', payloadInstance);
 
     await validateOrReject(payloadInstance);
 
@@ -32,15 +31,9 @@ export class AuthJwtTokenService {
       [TokenType.ACCESS]: 'JWT_ACCESS_TOKEN_EXPIRES_IN' as const,
       [TokenType.REFRESH]: 'JWT_REFRESH_TOKEN_EXPIRES_IN' as const,
     }[tokenType];
-    console.log('expiresInEnvName: ', expiresInEnvName);
 
     const expiresIn = this.configService.get(expiresInEnvName, { infer: true });
 
-    console.log('expiresIn: ', expiresIn);
-    const payloadPlain = instanceToPlain(payloadInstance, {
-      excludeExtraneousValues: true,
-    });
-    console.log('payloadPlain: ', payloadPlain);
     const currentTime = Math.floor(Date.now() / 1000);
     const payloadWithClaims = {
       ...instanceToPlain(payloadInstance, { excludeExtraneousValues: true }),
@@ -54,17 +47,11 @@ export class AuthJwtTokenService {
   }
 
   verifyToken(jwtToken: string): UserJwtPayloadDto {
-    console.log('jwtToken: ', jwtToken);
     try {
       const payload = this.jwtService.verify<UserJwtPayloadDto>(jwtToken);
 
-      // Now you have access to 'iat' and 'exp' in the payload
-      // console.log('iat: ', payload.iat);
-      // console.log('exp: ', payload.exp);
-
       return payload;
     } catch (error) {
-      console.log('error: ', error);
       if (error instanceof TokenExpiredError)
         throw new JwtExpiredException({ cause: error });
       else if (error instanceof JsonWebTokenError)

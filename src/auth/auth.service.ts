@@ -50,7 +50,6 @@ export class AuthService {
       const user = await this.userService.findUserByEmailOrFail(email);
       const { id: userId } = user;
       const isPasswordCorrect = await compare(password, user.password);
-      console.log('isPasswordCorrect: ', isPasswordCorrect);
 
       if (!isPasswordCorrect) throw new IncorrectPasswordException();
       const accessToken = await this.authJwtTokenService.generateToken({

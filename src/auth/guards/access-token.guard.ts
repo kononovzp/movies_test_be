@@ -31,10 +31,9 @@ export class AccessTokenGuard implements CanActivate {
     const accessToken = tokenFromHeader(request);
 
     if (!accessToken) throw new UnauthorizedException();
-    console.log('accessToken: ', accessToken);
 
     const payload = this.authJwtTokenService.verifyToken(accessToken);
-    console.log('authJwtTokenService.verifyToken: ', payload);
+
     const { tokenType } = payload;
 
     if (tokenType !== TokenType.ACCESS) throw new InvalidJwtTypeException();

@@ -9,7 +9,6 @@ import { UserAlreadyExistsException } from 'user/exceptions/user-already-exists.
 import { UserNotFoundByEmailException } from 'user/exceptions/user-not-found-by-email.exception';
 import { UserNotFoundByIdException } from 'user/exceptions/user-not-found-by-id.exception';
 import { UserCreateData } from 'user/types/user-create-data.type';
-import { UserUpdateData } from 'user/types/user-update-data.type';
 
 @Injectable()
 export class UserService {
@@ -95,19 +94,5 @@ export class UserService {
     if (!user) throw new UserNotFoundByEmailException(email);
 
     return user as T;
-  }
-
-  async updateUserById(userId: string, data: UserUpdateData): Promise<void> {
-    await this.userRepository.update({ id: userId }, data);
-  }
-
-  async updateUserByIdAndReturn(
-    userId: string,
-    data: UserUpdateData,
-    relations?: FindOptionsRelations<User>,
-  ): Promise<User> {
-    await this.updateUserById(userId, data);
-
-    return await this.findUserByIdOrFail(userId, relations);
   }
 }

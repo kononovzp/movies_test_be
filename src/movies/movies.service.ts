@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateMovieDto } from 'movies/dto/create-movie.dto';
+import { CreateMovieDto } from 'movies/dto/create-movie-request-body.dto';
 import { GetMovieResponseBodyDto } from 'movies/dto/get-movie-response-body.dto';
-import { MoviesResponseDto } from 'movies/dto/get-movies-res.dto';
 import { Movies } from 'movies/entity/movies.entity';
+import { MovieNotFoundByIdException } from 'movies/exceptions/movie-not-found-by-id.exception';
 import { StorageService } from 'storage/storage.service';
 import { Repository } from 'typeorm';
 import { User } from 'user/entities/user.entity';
+import { UserNotFoundByIdException } from 'user/exceptions/user-not-found-by-id.exception';
 
 @Injectable()
 export class MoviesService {
@@ -35,9 +36,7 @@ export class MoviesService {
       preserveFileName: true,
     });
 
-    if (!user) {
-      throw new Error('User not found');
-    }
+    if (!user) throw new UserNotFoundByIdException(userId);
 
     const movie = this.moviesRepository.create({
       ...createMovieDto,
@@ -63,14 +62,15 @@ export class MoviesService {
     userId: string;
     skip?: number;
     take?: number;
-  }): Promise<MoviesResponseDto> {
+  }): Promise<{
+    movies: GetMovieResponseBodyDto[];
+    count: number;
+  }> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
 
-    if (!user) {
-      throw new Error('User not found');
-    }
+    if (!user) throw new UserNotFoundByIdException(userId);
 
     const [movies, count] = await this.moviesRepository.findAndCount({
       where: { user: { id: user.id } },
@@ -100,9 +100,7 @@ export class MoviesService {
       relations: ['user'],
     });
 
-    if (!movie) {
-      throw new Error('Movie not found');
-    }
+    if (!movie) throw new MovieNotFoundByIdException(movieId);
 
     if (updateMovieDto.title) movie.title = updateMovieDto.title;
     if (updateMovieDto.publishYear)
